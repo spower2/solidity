@@ -6290,34 +6290,34 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 	char const* text = R"(
 		contract C {
 			function f() returns (bytes4) {
-				return f.sig;
+				return f.selector;
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"sig\" not found");
+	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
 	text = R"(
 		contract C {
 			function g() internal {
 			}
 			function f() returns (bytes4) {
-				return g.sig;
+				return g.selector;
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"sig\" not found");
+	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
 	text = R"(
 		contract C {
 			function f() returns (bytes4) {
 				function () g;
-				return g.sig;
+				return g.selector;
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"sig\" not found");
+	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
 	text = R"(
 		contract C {
 			function f() returns (bytes4) {
-				return this.f.sig;
+				return this.f.selector;
 			}
 		}
 	)";
@@ -6325,7 +6325,7 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 	text = R"(
 		contract C {
 			function f() external returns (bytes4) {
-				return this.f.sig;
+				return this.f.selector;
 			}
 		}
 	)";
@@ -6336,7 +6336,7 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			}
 			function f() external returns (bytes4) {
 				var g = this.h;
-				return g.sig;
+				return g.selector;
 			}
 		}
 	)";
@@ -6347,11 +6347,11 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			}
 			function f() external returns (bytes4) {
 				function () external g = this.h;
-				return g.sig;
+				return g.selector;
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"sig\" not found");
+	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
 	text = R"(
 		contract C {
 			function h() external {
@@ -6359,11 +6359,11 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			function f() external returns (bytes4) {
 				function () external g = this.h;
 				var i = g;
-				return i.sig;
+				return i.selector;
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"sig\" not found");
+	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
 }
 
 BOOST_AUTO_TEST_CASE(using_this_in_constructor)
