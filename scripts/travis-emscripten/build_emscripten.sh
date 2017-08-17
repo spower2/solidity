@@ -52,40 +52,6 @@ rm -rf b2 libs doc tools more bin.v2 status
 )
 echo -en 'travis_fold:end:compiling_boost\\r'
 
-# Build dependent components and solidity itself
-echo -en 'travis_fold:start:compiling_solidity\\r'
-cd $WORKSPACE
-mkdir -p build
-cd build
-cmake \
-  -DCMAKE_TOOLCHAIN_FILE=$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DEMSCRIPTEN=1 \
-  -DBoost_FOUND=1 \
-  -DBoost_USE_STATIC_LIBS=1 \
-  -DBoost_USE_STATIC_RUNTIME=1 \
-  -DBoost_INCLUDE_DIR="$WORKSPACE"/boost_1_57_0/ \
-  -DBoost_FILESYSTEM_LIBRARY="$WORKSPACE"/boost_1_57_0/libboost_filesystem.a \
-  -DBoost_FILESYSTEM_LIBRARIES="$WORKSPACE"/boost_1_57_0/libboost_filesystem.a \
-  -DBoost_PROGRAM_OPTIONS_LIBRARY="$WORKSPACE"/boost_1_57_0/libboost_program_options.a \
-  -DBoost_PROGRAM_OPTIONS_LIBRARIES="$WORKSPACE"/boost_1_57_0/libboost_program_options.a \
-  -DBoost_REGEX_LIBRARY="$WORKSPACE"/boost_1_57_0/libboost_regex.a \
-  -DBoost_REGEX_LIBRARIES="$WORKSPACE"/boost_1_57_0/libboost_regex.a \
-  -DBoost_SYSTEM_LIBRARY="$WORKSPACE"/boost_1_57_0/libboost_system.a \
-  -DBoost_SYSTEM_LIBRARIES="$WORKSPACE"/boost_1_57_0/libboost_system.a \
-  -DBoost_UNIT_TEST_FRAMEWORK_LIBRARY="$WORKSPACE"/boost_1_57_0/libboost_unit_test_framework.a \
-  -DBoost_UNIT_TEST_FRAMEWORK_LIBRARIES="$WORKSPACE"/boost_1_57_0/libboost_unit_test_framework.a \
-  -DTESTS=0 \
-  ..
-make -j 4
 
-cd ..
-mkdir -p upload
-cp build/solc/soljson.js upload/
-cp build/solc/soljson.js ./
-
-OUTPUT_SIZE=`ls -la soljson.js`
-
-echo "Emscripten output size: $OUTPUT_SIZE"
 
 echo -en 'travis_fold:end:compiling_solidity\\r'
