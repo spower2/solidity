@@ -319,6 +319,21 @@ void CompilerUtils::abiEncode(
 	m_context << ret.tag();
 }
 
+void CompilerUtils::abiDecode(TypePointers const& _parameterTypes, bool _fromMemory)
+{
+	// stack: <source_offset>
+	auto ret = m_context.pushNewTag();
+	m_context << Instruction::SWAP1;
+	// TODO pass correct size for the memory case
+	m_context << (_fromMemory ? (u256(1) << 63) : Instruction::CALLDATASIZE);
+	m_context << Instruction::SWAP1;
+
+	string decoderName = m_context.abiFunctions().tupleDecoder(_parameterTypes, _fromMemory);
+	m_context.appendJumpTo(m_context.namedTag(decoderName));
+	m_context.adjustStackOffset(int(sizeOnStack(_parameterTypes)) - 2);
+	m_context << ret.tag();
+}
+
 void CompilerUtils::zeroInitialiseMemoryArray(ArrayType const& _type)
 {
 	auto repeat = m_context.newTag();

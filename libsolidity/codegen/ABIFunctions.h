@@ -66,6 +66,16 @@ public:
 		bool _encodeAsLibraryTypes = false
 	);
 
+	/// @returns name of an assembly function to ABI-decode values of @a _types
+	/// into memory. If @a _fromMemory is true, decodes from memory instead of
+	/// from calldata.
+	/// Can allocate memory.
+	/// Inputs: <source_offset> <source_end>
+	/// Outputs: <value0> <value1> ... <valuen>
+	/// The values represent stack slots. If a type occupies more or less than one
+	/// stack slot, it takes exactly that number of values.
+	std::string tupleDecoder(TypePointers const& _types, bool _fromMemory = false);
+
 	/// @returns concatenation of all generated functions.
 	std::string requestedFunctions();
 
@@ -86,6 +96,10 @@ private:
 	/// @returns a function that combines the address and selector to a single value
 	/// for use in the ABI.
 	std::string combineExternalFunctionIdFunction();
+
+	/// @returns a function that splits the address and selector from a single value
+	/// for use in the ABI.
+	std::string splitExternalFunctionIdFunction();
 
 	/// @returns the name of the ABI encoding function with the given type
 	/// and queues the generation of the function to the requested functions.
@@ -145,6 +159,21 @@ private:
 		bool _encodeAsLibraryTypes,
 		bool _compacted
 	);
+
+	/// @returns the name of the ABI decodinf function for the given type
+	/// and queues the generation of the function to the requested functions.
+	/// @param _fromMemory if decoding from memory instead of from calldata
+	std::string abiDecodingFunction(
+		Type const& _Type,
+		bool _fromMemory
+	);
+
+	/// Part of @a abiDecodingFunction for array types.
+	std::string abiDecodingFunctionArray(ArrayType const& _type, bool _fromMemory);
+	/// Part of @a abiDecodingFunction for struct types.
+	std::string abiDecodingFunctionStruct(StructType const& _type, bool _fromMemory);
+	/// Part of @a abiDecodingFunction for array types.
+	std::string abiDecodingFunctionFunctionType(FunctionType const& _type, bool _fromMemory);
 
 	/// @returns a function that copies raw bytes of dynamic length from calldata
 	/// or memory to memory.

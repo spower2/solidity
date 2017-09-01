@@ -99,6 +99,68 @@ string ABIFunctions::tupleEncoder(
 	});
 }
 
+string ABIFunctions::tupleDecoder(TypePointers const& _types, bool _fromMemory)
+{
+	string functionName = string("abi_decode_tuple_");
+	for (auto const& t: _types)
+		functionName += t->identifier();
+	if (_fromMemory)
+		functionName += "_fromMemory";
+
+	return createFunction(functionName, [&]() {
+		solAssert(!_types.empty(), "");
+
+		// Note that the return values have to be in reverse due to the difference in calling semantics.
+		Whiskers templ(R"(
+			function <functionName>(headStart, dataEnd) -> <valueReturnParams> {
+				switch slt(sub(dataEnd, headStart), <minimumSize>) case 1 { revert(0, 0) }
+				<decodeElements>
+			}
+		)");
+		templ("functionName", functionName);
+		templ("minimumSize", to_string(headSize(_types)));
+
+		string decodeElements;
+		string valueReturnParams;
+		size_t headPos = 0;
+		size_t stackPos = 0;
+		for (size_t i = 0; i < _types.size(); ++i)
+		{
+			solAssert(_types[i], "");
+			size_t sizeOnStack = _types[i]->sizeOnStack();
+			solAssert(sizeOnStack > 0, "");
+			string valueNames = "";
+			for (size_t j = 0; j < sizeOnStack; j++)
+			{
+				valueNames += "value" + to_string(stackPos) + ", ";
+				valueReturnParams = ", value" + to_string(stackPos) + valueReturnParams;
+				stackPos++;
+			}
+			bool dynamic = _types[i]->isDynamicallyEncoded();
+			Whiskers elementTempl(R"(
+				{
+					let offset := )" + string(
+						dynamic ?
+						"<load>(add(headStart, <pos>))" :
+						"<pos>"
+					) + R"(
+					<values> := <abiDecode>(add(headStart, offset), dataEnd)
+				}
+			)");
+			elementTempl("load", _fromMemory ? "mload" : "calldataload");
+			elementTempl("values", valueNames);
+			elementTempl("pos", to_string(headPos));
+			elementTempl("abiDecode", abiDecodingFunction(*_types[i], _fromMemory));
+			decodeElements += elementTempl.render();
+			headPos += dynamic ? 0x20 : _types[i]->decodingType()->calldataEncodedSize();
+		}
+		templ("valueReturnParams", valueReturnParams);
+		templ("decodeElements", decodeElements);
+
+		return templ.render();
+	});
+}
+
 string ABIFunctions::requestedFunctions()
 {
 	string result;
@@ -363,6 +425,24 @@ string ABIFunctions::combineExternalFunctionIdFunction()
 		("functionName", functionName)
 		("shl32", shiftLeftFunction(32))
 		("shl64", shiftLeftFunction(64))
+		.render();
+	});
+}
+
+string ABIFunctions::splitExternalFunctionIdFunction()
+{
+	string functionName = "split_external_function_id";
+	return createFunction(functionName, [&]() {
+		return Whiskers(R"(
+			function <functionName>(combined) -> addr, selector {
+				combined := <shr64>(combined)
+				selector := and(combined, 0xffffffff)
+				addr := <shr32>(combined)
+			}
+		)")
+		("functionName", functionName)
+		("shr32", shiftRightFunction(32, false))
+		("shr64", shiftRightFunction(64, false))
 		.render();
 	});
 }
@@ -949,6 +1029,74 @@ string ABIFunctions::abiEncodingFunctionFunctionType(
 			.render();
 		});
 	}
+}
+
+string ABIFunctions::abiDecodingFunction(Type const& _type, bool _fromMemory)
+{
+	solAssert(_type.decodingType(), "");
+	TypePointer decodingType = _type.decodingType();
+
+	if (auto arrayType = dynamic_cast<ArrayType const*>(&_type))
+		return abiDecodingFunctionArray(*arrayType, _fromMemory);
+	else if (auto const* structType = dynamic_cast<StructType const*>(&_type))
+		return abiDecodingFunctionStruct(*structType, _fromMemory);
+	else if (auto const* functionType = dynamic_cast<FunctionType const*>(&_type))
+		return abiDecodingFunctionFunctionType(*functionType, _fromMemory);
+
+	solAssert(_type.sizeOnStack() == 1, "");
+	solAssert(_type.isValueType(), "");
+	solAssert(_type.calldataEncodedSize() == 32, "");
+	solAssert(!_type.isDynamicallyEncoded(), "");
+
+	string functionName =
+		"abi_decode_" +
+		_type.identifier() +
+		(_fromMemory ? "_fromMemory" : "");
+	return createFunction(functionName, [&]() {
+		Whiskers templ(R"(
+			function <functionName>(offset, end) -> value {
+				value := <cleanup>(<load>(offset))
+			}
+		)");
+		templ("functionName", functionName);
+		templ("load", _fromMemory ? "mload" : "calldataload");
+		templ("cleanup", cleanupFunction(_type, true) + "(value)");
+		return templ.render();
+	});
+}
+
+string ABIFunctions::abiDecodingFunctionArray(ArrayType const& /*_type*/, bool /*_fromMemory*/)
+{
+	solUnimplemented("");
+	return "";
+}
+
+string ABIFunctions::abiDecodingFunctionStruct(StructType const& /*_type*/, bool /*_fromMemory*/)
+{
+	solUnimplemented("");
+	return "";
+}
+
+string ABIFunctions::abiDecodingFunctionFunctionType(FunctionType const& _type, bool _fromMemory)
+{
+	solAssert(_type.kind() == FunctionType::Kind::External, "");
+
+	string functionName =
+		"abi_decode_" +
+		_type.identifier() +
+		(_fromMemory ? "_fromMemory" : "");
+
+	return createFunction(functionName, [&]() {
+		return Whiskers(R"(
+			function <functionName>(offset, end) -> addr, function_selector {
+				addr, function_selector := <splitExtFun>(<load>(offset))
+			}
+		)")
+		("functionName", functionName)
+		("load", _fromMemory ? "mload" : "calldataload")
+		("splitExtFun", splitExternalFunctionIdFunction())
+		.render();
+	});
 }
 
 string ABIFunctions::copyToMemoryFunction(bool _fromCalldata)
