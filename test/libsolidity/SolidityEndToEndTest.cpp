@@ -867,7 +867,7 @@ BOOST_AUTO_TEST_CASE(state_smoke_test)
 				if (which == 0) return value1;
 				else return value2;
 			}
-			function set(uint8 which, uint256 value) {
+			function set(uint8 which, uint256 value) public {
 				if (which == 0) value1 = value;
 				else value2 = value;
 			}
@@ -929,7 +929,7 @@ BOOST_AUTO_TEST_CASE(simple_mapping)
 			function get(uint8 k) public returns (uint8 v) {
 				return table[k];
 			}
-			function set(uint8 k, uint8 v) {
+			function set(uint8 k, uint8 v) public {
 				table[k] = v;
 			}
 		}
@@ -963,7 +963,7 @@ BOOST_AUTO_TEST_CASE(mapping_state)
 			function getVoteCount(address addr) public returns (uint retVoteCount) {
 				return voteCount[addr];
 			}
-			function grantVoteRight(address addr) {
+			function grantVoteRight(address addr) public {
 				canVote[addr] = true;
 			}
 			function vote(address voter, address vote) public returns (bool success) {
@@ -1114,7 +1114,7 @@ BOOST_AUTO_TEST_CASE(structs)
 					data.recursive[0].s1data.y == false &&
 					data.recursive[4].z == 9;
 			}
-			function set() {
+			function set() public {
 				data.z = 1;
 				data.s1data.x = 2;
 				data.s1data.y = true;
@@ -1146,7 +1146,7 @@ BOOST_AUTO_TEST_CASE(struct_reference)
 					data.recursive[0].recursive[1].z == 0 &&
 					data.recursive[0].recursive[0].z == 1;
 			}
-			function set() {
+			function set() public {
 				data.z = 2;
 				var map = data.recursive;
 				s2 inner = map[0];
@@ -1179,7 +1179,7 @@ BOOST_AUTO_TEST_CASE(deleteStruct)
 			}
 			struct emptyStruct{
 			}
-			function test(){
+			function test() public {
 				toDelete = 5;
 				str.topValue = 1;
 				str.topMapping[0] = 1;
@@ -1191,13 +1191,13 @@ BOOST_AUTO_TEST_CASE(deleteStruct)
 				delete str;
 				delete toDelete;
 			}
-			function getToDelete() public returns (uint res){
+			function getToDelete() public returns (uint res) {
 				res = toDelete;
 			}
-			function getTopValue() public returns(uint topValue){
+			function getTopValue() public returns(uint topValue) {
 				topValue = str.topValue;
 			}
-			function getNestedValue() public returns(uint nestedValue){
+			function getNestedValue() public returns(uint nestedValue) {
 				nestedValue = str.nstr.nestedValue;
 			}
 			function getTopMapping(uint index) public returns(uint ret) {
@@ -1223,7 +1223,7 @@ BOOST_AUTO_TEST_CASE(deleteLocal)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function delLocal() public returns (uint res){
+			function delLocal() public returns (uint res) {
 				uint v = 5;
 				delete v;
 				res = v;
@@ -1238,7 +1238,7 @@ BOOST_AUTO_TEST_CASE(deleteLocals)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function delLocal() public returns (uint res1, uint res2){
+			function delLocal() public returns (uint res1, uint res2) {
 				uint v = 5;
 				uint w = 6;
 				uint x = 7;
@@ -1281,7 +1281,7 @@ BOOST_AUTO_TEST_CASE(simple_accessor)
 	char const* sourceCode = R"(
 		contract test {
 			uint256 public data;
-			function test() {
+			function test() public {
 				data = 8;
 			}
 		}
@@ -1300,7 +1300,7 @@ BOOST_AUTO_TEST_CASE(array_accessor)
 			struct st { uint a; uint[] finalArray; }
 			mapping(uint256 => mapping(uint256 => st[5])) public multiple_map;
 
-			function test() {
+			function test() public {
 				data[0] = 8;
 				dynamicData.length = 3;
 				dynamicData[2] = 8;
@@ -1330,7 +1330,7 @@ BOOST_AUTO_TEST_CASE(accessors_mapping_for_array)
 		contract test {
 			mapping(uint => uint[8]) public data;
 			mapping(uint => uint[]) public dynamicData;
-			function test() {
+			function test() public {
 				data[2][2] = 8;
 				dynamicData[2].length = 3;
 				dynamicData[2][2] = 8;
@@ -1352,7 +1352,7 @@ BOOST_AUTO_TEST_CASE(multiple_elementary_accessors)
 			bytes6 public name;
 			bytes32 public a_hash;
 			address public an_address;
-			function test() {
+			function test() public {
 				data = 8;
 				name = "Celina";
 				a_hash = keccak256(123);
@@ -1378,7 +1378,7 @@ BOOST_AUTO_TEST_CASE(complex_accessors)
 			mapping(uint256 => bool) public to_bool_map;
 			mapping(uint256 => uint256) public to_uint_map;
 			mapping(uint256 => mapping(uint256 => uint256)) public to_multiple_map;
-			function test() {
+			function test() public {
 				to_string_map[42] = "24";
 				to_bool_map[42] = false;
 				to_uint_map[42] = 12;
@@ -1399,7 +1399,7 @@ BOOST_AUTO_TEST_CASE(struct_accessor)
 		contract test {
 			struct Data { uint a; uint8 b; mapping(uint => uint) c; bool d; }
 			mapping(uint => Data) public data;
-			function test() {
+			function test() public {
 				data[7].a = 1;
 				data[7].b = 2;
 				data[7].c[0] = 3;
@@ -1690,7 +1690,7 @@ BOOST_AUTO_TEST_CASE(transfer_ether)
 				addr.transfer(amount);
 				return this.balance;
 			}
-			function b(address addr, uint amount) {
+			function b(address addr, uint amount) public {
 				addr.transfer(amount);
 			}
 		}
@@ -1721,7 +1721,7 @@ BOOST_AUTO_TEST_CASE(log0)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function a() {
+			function a() public {
 				log0(1);
 			}
 		}
@@ -1738,7 +1738,7 @@ BOOST_AUTO_TEST_CASE(log1)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function a() {
+			function a() public {
 				log1(1, 2);
 			}
 		}
@@ -1756,7 +1756,7 @@ BOOST_AUTO_TEST_CASE(log2)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function a() {
+			function a() public {
 				log2(1, 2, 3);
 			}
 		}
@@ -1775,7 +1775,7 @@ BOOST_AUTO_TEST_CASE(log3)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function a() {
+			function a() public {
 				log3(1, 2, 3, 4);
 			}
 		}
@@ -1794,7 +1794,7 @@ BOOST_AUTO_TEST_CASE(log4)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function a() {
+			function a() public {
 				log4(1, 2, 3, 4, 5);
 			}
 		}
@@ -1813,7 +1813,7 @@ BOOST_AUTO_TEST_CASE(log_in_constructor)
 {
 	char const* sourceCode = R"(
 		contract test {
-			function test() {
+			function test() public {
 				log1(1, 2);
 			}
 		}
@@ -2065,7 +2065,7 @@ BOOST_AUTO_TEST_CASE(inter_contract_calls)
 			function getHelper() public returns (address haddress) {
 				return address(h);
 			}
-			function setHelper(address haddress) {
+			function setHelper(address haddress) public {
 				h = Helper(haddress);
 			}
 		})";
@@ -2095,7 +2095,7 @@ BOOST_AUTO_TEST_CASE(inter_contract_calls_with_complex_parameters)
 			function getHelper() public returns (address haddress) {
 				return address(h);
 			}
-			function setHelper(address haddress) {
+			function setHelper(address haddress) public {
 				h = Helper(haddress);
 			}
 		})";
@@ -2126,7 +2126,7 @@ BOOST_AUTO_TEST_CASE(inter_contract_calls_accessing_this)
 			function getHelper() public returns (address addr) {
 				return address(h);
 			}
-			function setHelper(address addr) {
+			function setHelper(address addr) public {
 				h = Helper(addr);
 			}
 		})";
@@ -2157,7 +2157,7 @@ BOOST_AUTO_TEST_CASE(calls_to_this)
 			function getHelper() public returns (address addr) {
 				return address(h);
 			}
-			function setHelper(address addr) {
+			function setHelper(address addr) public {
 				h = Helper(addr);
 			}
 		})";
@@ -2192,7 +2192,7 @@ BOOST_AUTO_TEST_CASE(inter_contract_calls_with_local_vars)
 			function getHelper() public returns (address haddress) {
 				return address(h);
 			}
-			function setHelper(address haddress) {
+			function setHelper(address haddress) public {
 				h = Helper(haddress);
 			}
 		})";
@@ -2222,7 +2222,7 @@ BOOST_AUTO_TEST_CASE(fixed_bytes_in_calls)
 			function getHelper() public returns (address addr) {
 				return address(h);
 			}
-			function setHelper(address addr) {
+			function setHelper(address addr) public {
 				h = Helper(addr);
 			}
 		})";
@@ -2349,11 +2349,11 @@ BOOST_AUTO_TEST_CASE(contracts_as_addresses)
 {
 	char const* sourceCode = R"(
 		contract helper {
-			function() payable { } // can receive ether
+			function() payable public { } // can receive ether
 		}
 		contract test {
 			helper h;
-			function test() payable { h = new helper(); h.send(5); }
+			function test() payable public { h = new helper(); h.send(5); }
 			function getBalance() public returns (uint256 myBalance, uint256 helperBalance) {
 				myBalance = this.balance;
 				helperBalance = h.balance;
@@ -2373,12 +2373,12 @@ BOOST_AUTO_TEST_CASE(gas_and_value_basic)
 			function getBalance() payable public returns (uint256 myBalance) {
 				return this.balance;
 			}
-			function setFlag() { flag = true; }
+			function setFlag() public { flag = true; }
 			function getFlag() public returns (bool fl) { return flag; }
 		}
 		contract test {
 			helper h;
-			function test() payable { h = new helper(); }
+			function test() payable public { h = new helper(); }
 			function sendAmount(uint amount) payable public returns (uint256 bal) {
 				return h.getBalance.value(amount)();
 			}
@@ -2432,7 +2432,7 @@ BOOST_AUTO_TEST_CASE(value_insane)
 		}
 		contract test {
 			helper h;
-			function test() payable { h = new helper(); }
+			function test() payable public { h = new helper(); }
 			function sendAmount(uint amount) public returns (uint256 bal) {
 				var x1 = h.getBalance.value;
 				var x2 = x1(amount).gas;
@@ -4744,11 +4744,11 @@ BOOST_AUTO_TEST_CASE(swap_in_storage_overwrite)
 			struct S { uint a; uint b; }
 			S public x;
 			S public y;
-			function set() {
+			function set() public {
 				x.a = 1; x.b = 2;
 				y.a = 3; y.b = 4;
 			}
-			function swap() {
+			function swap() public {
 				(x, y) = (y, x);
 			}
 		}
@@ -6033,7 +6033,7 @@ BOOST_AUTO_TEST_CASE(storage_array_ref)
 		  function find(uint[] storage _data, uint _value) internal returns (uint o_position) {
 			return find(_data, 0, _data.length, _value);
 		  }
-		  function find(uint[] storage _data, uint _begin, uint _len, uint _value) private public returns (uint o_position) {
+		  function find(uint[] storage _data, uint _begin, uint _len, uint _value) private returns (uint o_position) {
 			if (_len == 0 || (_len == 1 && _data[_begin] != _value))
 			  return uint(-1); // failure
 			uint halfLen = _len / 2;
@@ -8664,7 +8664,7 @@ BOOST_AUTO_TEST_CASE(pass_function_types_internally)
 			function f(uint x) public returns (uint) {
 				return eval(g, x);
 			}
-			function eval(function(uint) public returns (uint) x, uint a) internal returns (uint) {
+			function eval(function(uint) returns (uint) x, uint a) internal returns (uint) {
 				return x(a);
 			}
 			function g(uint x) public returns (uint) { return x + 1; }
@@ -8740,7 +8740,7 @@ BOOST_AUTO_TEST_CASE(store_function)
 			function addTwo(uint x) public returns (uint) { return x + 2; }
 		}
 		contract C {
-			function (function (uint) external returns (uint)) public returns (uint) ev;
+			function (function (uint) external returns (uint)) returns (uint) ev;
 			function (uint) external returns (uint) x;
 			function store(function(uint) external returns (uint) y) {
 				x = y;
@@ -8969,13 +8969,13 @@ BOOST_AUTO_TEST_CASE(packed_functions)
 	char const* sourceCode = R"(
 		contract C {
 			// these should take the same slot
-			function() public returns (uint) a;
+			function() returns (uint) a;
 			function() external returns (uint) b;
 			function() external returns (uint) c;
-			function() public returns (uint) d;
+			function() returns (uint) d;
 			uint8 public x;
 
-			function set() {
+			function set() public {
 				x = 2;
 				d = g;
 				c = this.h;
