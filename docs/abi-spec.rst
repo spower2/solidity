@@ -66,13 +66,12 @@ The following non-fixed-size types exist:
 
 - ``<type>[]``: a variable-length array of the given fixed-length type.
 
-Types can be combined to anonymous structs by enclosing a finite non-negative number
+Types can be combined to a tuple by enclosing a finite non-negative number
 of them inside parentheses, separated by commas:
 
-- ``(T1,T2,...,Tn)``: anonymous struct (ordered tuple) consisting of the types ``T1``, ..., ``Tn``, ``n >= 0``
+- ``(T1,T2,...,Tn)``: tuple consisting of the types ``T1``, ..., ``Tn``, ``n >= 0``
 
-It is possible to form structs of structs, arrays of structs and so on.
-
+It is possible to form tuples of tuples, arrays of tuples and so on.
 
 Formal Specification of the Encoding
 ====================================
@@ -130,7 +129,7 @@ on the type of ``X`` being
 
   ``enc(X) = enc((X[0], ..., X[k-1]))``
   
-  i.e. it is encoded as if it were an anonymous struct with ``k`` elements
+  i.e. it is encoded as if it were a tuple with ``k`` elements
   of the same type.
   
 - ``T[]`` where ``X`` has ``k`` elements (``k`` is assumed to be of type ``uint256``):
@@ -173,7 +172,7 @@ and the return values ``v_1, ..., v_k`` of ``f`` are encoded as
 
   ``enc((v_1, ..., v_k))``
 
-i.e. the values are combined into an anonymous struct and encoded.
+i.e. the values are combined into a tuple and encoded.
 
 Examples
 ========
@@ -294,7 +293,7 @@ A function description is a JSON object with the fields:
 - ``inputs``: an array of objects, each of which contains:
   * ``name``: the name of the parameter;
   * ``type``: the canonical type of the parameter (more below).
-  * ``components``: used for struct types (more below).
+  * ``components``: used for tuple types (more below).
 - ``outputs``: an array of objects similar to ``inputs``, can be omitted if function doesn't return anything;
 - ``payable``: ``true`` if function accepts ether, defaults to ``false``;
 - ``stateMutability``: a string with one of the following values: ``pure`` (:ref:`specified to not read blockchain state <pure-functions>`), ``view`` (:ref:`specified to not modify the blockchain state <view-functions>`), ``nonpayable`` and ``payable`` (same as ``payable`` above).
@@ -313,7 +312,7 @@ An event description is a JSON object with fairly similar fields:
 - ``inputs``: an array of objects, each of which contains:
   * ``name``: the name of the parameter;
   * ``type``: the canonical type of the parameter (more below).
-  * ``components``: used for struct types (more below).
+  * ``components``: used for tuple types (more below).
   * ``indexed``: ``true`` if the field is part of the log's topics, ``false`` if it one of the log's data segment.
 - ``anonymous``: ``true`` if the event was declared as ``anonymous``.
 
@@ -350,17 +349,17 @@ would result in the JSON:
   "outputs": []
   }]
 
-Use of Structs in Types
------------------------
+Handling tuple types
+--------------------
 
-If structs are part of the type, we still want to know the name of the components. Because of that,
+If tuples are part of the type, we still want to know the name of the components. Because of that,
 the json structure gets arbitrarily nested in the following way:
 
 An object with members ``name``, ``type`` and potentially ``components`` describes a typed variable.
-The canonical type is determined until a struct type is reached and the string description up
-to that point is stored in ``type`` prefix with the word ``struct``, i.e. it will be ``struct`` followed by
+The canonical type is determined until a tuple type is reached and the string description up
+to that point is stored in ``type`` prefix with the word ``tuple``, i.e. it will be ``tuple`` followed by
 a sequence of ``[]`` and ``[k]`` with
-integers ``k``. The components of the struct are then stored in the member ``components``,
+integers ``k``. The components of the tuple are then stored in the member ``components``,
 which is of array type and has the same structure as the top-level object except that
 ``indexed`` is not allowed there.
 
@@ -385,7 +384,7 @@ would result in the JSON:
       "inputs": [
         {
           "name": "s",
-          "type": "struct",
+          "type": "tuple",
           "components": [
             {
               "name": "a",
@@ -397,7 +396,7 @@ would result in the JSON:
             },
             {
               "name": "c",
-              "type": "struct[]",
+              "type": "tuple[]",
               "components": [
                 {
                   "name": "x",
@@ -413,7 +412,7 @@ would result in the JSON:
         },
         {
           "name": "t",
-          "type": "struct",
+          "type": "tuple",
           "components": [
             {
               "name": "x",
