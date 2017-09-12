@@ -6,6 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install external tests deps
+          command: |
+            apt-get -qq update
+            apt-get -qy install netcat curl
+            curl -s https://nodejs.org/dist/v6.11.3/node-v6.11.3-linux-x64.tar.xz | tar Jx
+      - run:
           name: Init submodules
           command: |
             git submodule update --init
@@ -67,11 +73,12 @@ jobs:
           name: Install external tests deps
           command: |
             apt-get -qq update
-            apt-get -qy install netcat
+            apt-get -qy install netcat curl
+            curl -s https://nodejs.org/dist/v6.11.3/node-v6.11.3-linux-x64.tar.xz | tar Jx
       - run:
           name: Test
           command: |
-            export PATH=$EMSDK/node/bin:$PATH
+            export PATH=$(pwd)/node-v6.11.3-linux-x64/bin:$PATH
             git config --global user.email "circleci@circleci.com"
             git config --global user.name "Circle CI"
             scripts/test_emscripten.sh
