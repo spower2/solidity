@@ -7,18 +7,13 @@ jobs:
       - checkout
       - run: git submodule update --init
       - run: |
-          . /entrypoint
-          echo $PATH
-          echo $EMSCRIPTEN
           scripts/travis-emscripten/install_deps.sh
       - run: |
-          . /entrypoint
           scripts/travis-emscripten/build_emscripten.sh
 
       - run:
           name: Build
           command: |
-            . /entrypoint
             WORKSPACE=$(pwd)
             mkdir -p build
             cd build
@@ -55,7 +50,7 @@ jobs:
       - run:
           name: Test
           command: |
-            . /entrypoint
+            export PATH=$EMSDK/node/bin:$PATH
             git config --global user.email "circleci@circleci.com"
             git config --global user.name "Circle CI"
             scripts/test_emscripten.sh
