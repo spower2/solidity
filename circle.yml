@@ -62,6 +62,12 @@ jobs:
             OUTPUT_SIZE=`ls -la build/solc/soljson.js`
 
             echo "Emscripten output size: $OUTPUT_SIZE"
+
+      - run:
+          name: Install external tests deps
+          command: |
+            apt-get -qq update
+            apt-get -qy install netcat
       - run:
           name: Test
           command: |
