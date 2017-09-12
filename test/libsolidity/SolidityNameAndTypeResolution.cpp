@@ -6351,7 +6351,7 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
+	CHECK_SUCCESS_NO_WARNINGS(text);
 	text = R"(
 		contract C {
 			function h() external {
@@ -6363,7 +6363,7 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			}
 		}
 	)";
-	CHECK_ERROR(text, TypeError, "Member \"selector\" not found");
+	CHECK_SUCCESS_NO_WARNINGS(text);
 }
 
 BOOST_AUTO_TEST_CASE(using_this_in_constructor)
