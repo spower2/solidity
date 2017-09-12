@@ -10058,10 +10058,21 @@ BOOST_AUTO_TEST_CASE(function_types_sig)
 			function f() returns (bytes4) {
 				return this.f.selector;
 			}
+			function g() returns (bytes4) {
+				function () external fun = this.f;
+				return fun.selector;
+			}
+			function h() returns (bytes4) {
+				function () external fun = this.f;
+				var funvar = fun;
+				return funvar.selector;
+			}
 		}
 	)";
 	compileAndRun(sourceCode, 0, "C");
 	BOOST_CHECK(callContractFunction("f()") == encodeArgs(asString(FixedHash<4>(dev::keccak256("f()")).asBytes())));
+	BOOST_CHECK(callContractFunction("h()") == encodeArgs(asString(FixedHash<4>(dev::keccak256("f()")).asBytes())));
+	BOOST_CHECK(callContractFunction("g()") == encodeArgs(asString(FixedHash<4>(dev::keccak256("f()")).asBytes())));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
