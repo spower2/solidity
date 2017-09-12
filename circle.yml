@@ -9,6 +9,9 @@ jobs:
           name: Init submodules
           command: |
             git submodule update --init
+      - restore_cache:
+          name: Restore Boost build
+          key: &boost-cache-key emscripten-boost-{{ checksum "scripts/travis-emscripten/install_deps.sh" }}{{ checksum "scripts/travis-emscripten/build_emscripten.sh" }}
       - run:
           name: Bootstrap Boost
           command: |
@@ -17,6 +20,11 @@ jobs:
           name: Build Boost
           command: |
             scripts/travis-emscripten/build_emscripten.sh
+      - save_cache:
+          name: Save Boost build
+          key: *boost-cache-key
+          paths:
+            - boost_1_57_0
 
       - run:
           name: Build
