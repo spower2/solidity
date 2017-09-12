@@ -5,11 +5,18 @@ jobs:
       - image: trzeci/emscripten:sdk-tag-1.37.21-64bit
     steps:
       - checkout
-      - run: git submodule update --init
-      - run: |
-          scripts/travis-emscripten/install_deps.sh
-      - run: |
-          scripts/travis-emscripten/build_emscripten.sh
+      - run:
+          name: Init submodules
+          command: |
+            git submodule update --init
+      - run:
+          name: Bootstrap Boost
+          command: |
+            scripts/travis-emscripten/install_deps.sh
+      - run:
+          name: Build Boost
+          command: |
+            scripts/travis-emscripten/build_emscripten.sh
 
       - run:
           name: Build
