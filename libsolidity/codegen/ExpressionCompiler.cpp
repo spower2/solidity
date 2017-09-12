@@ -1070,10 +1070,9 @@ bool ExpressionCompiler::visit(MemberAccess const& _memberAccess)
 	case Type::Category::Function:
 		if (member == "selector")
 		{
-			FunctionType const& type = dynamic_cast<FunctionType const&>(*_memberAccess.expression().annotation().type);
-			utils().popStackElement(type);
+			m_context << Instruction::SWAP1 << Instruction::POP;
 			/// need to store store it as bytes4
-			m_context << (type.externalIdentifier() << 224);
+			utils().leftShiftNumberOnStack(224);
 		}
 		else
 			solAssert(!!_memberAccess.expression().annotation().type->memberType(member),
